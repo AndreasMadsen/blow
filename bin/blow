@@ -1,0 +1,46 @@
+#!/usr/bin/env node
+
+var path = require('path');
+
+var core = require( path.resolve(path.dirname(module.filename), '../blow.js') );
+
+var argv = process.argv.slice(2);
+var files = [];
+var args = [];
+
+argv.forEach(function (arg) {
+  if (arg[0] === '-') {
+    args.push(arg);
+  } else {
+    files.push(path.resolve(arg));
+  }
+});
+
+// var parse settings
+var match = /^-(-)?([a-z]+)=([a-z0-9]+)$/;
+var settings = {
+  port: 0,
+  style: 'bdd'
+};
+var map = {
+  'p': 'port',
+  's': 'style'
+};
+args.forEach(function (string) {
+  var result = string.match(match);
+
+  if (result[1] === undefined) {
+    result[2] = map[result[2]];
+  }
+
+  if (result[3] === 'port') {
+    result[2] = parseInt(result[2], 10);
+  }
+
+  if (settings.hasOwnProperty(result[2])) {
+    settings[result[2]] = result[3];
+  }
+});
+
+// start server
+core(files, settings);

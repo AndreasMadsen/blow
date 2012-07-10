@@ -8,7 +8,7 @@ var path = require('path');
 var tako = require('tako');
 var domstream = require('domstream');
 
-module.exports = function(port, files, style) {
+module.exports = function(files, settings) {
 
   var app = tako();
 
@@ -40,22 +40,21 @@ module.exports = function(port, files, style) {
 
   // route all static test files
   Object.keys(map).forEach(function (relative) {
-    console.log('/test' + relative + ' = ' + map[relative]);
     app.route('/test' + relative).file(map[relative]);
   });
 
   //
-  var indexFile = generateIndex(map, style);
+  var indexFile = generateIndex(map, settings.style);
   app.route('/').html(indexFile);
 
   // route all subtest pages
   Object.keys(map).forEach(function (relative) {
-    var content = generateTest(relative, style);
+    var content = generateTest(relative, settings.style);
     app.route(relative).html(content);
   });
 
-  app.httpServer.listen(port, function () {
-    console.log('mocha server online at http://127.0.0.1:' + port);
+  app.httpServer.listen(settings.port, function () {
+    console.log('blow server online at http://127.0.0.1:' + app.httpServer.address().port);
   });
 };
 
