@@ -1,6 +1,6 @@
 {
   "name": "blow",
-  "description": "simple boilerplate for the testframework mocha brower",
+  "description": "Simple browser boilerplate for the test framework: mocha",
   "version": "0.1.0",
   "author": "Andreas Madsen <amwebdk@gmail.com>",
   "main": "./blow.js",
