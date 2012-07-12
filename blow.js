@@ -7,6 +7,8 @@ var fs = require('fs');
 var path = require('path');
 var tako = require('tako');
 var domstream = require('domstream');
+var querystring = require('querystring');
+var filed = require('filed');
 
 module.exports = function(files, settings) {
 
@@ -56,6 +58,14 @@ module.exports = function(files, settings) {
     app.route(relative).html(content);
   });
 
+  // route static requests
+  var staticRoot = path.dirname(settings.index);
+  app.route('/static', function (req, res) {
+    // yes, this so unsafe that it is hard to understand
+    // but wtf, it is just a testsuite
+    req.pipe( filed(path.resolve(staticRoot, req.qs.src)) ).pipe(res);
+  });
+
   app.httpServer.listen(settings.port, settings.address, function () {
     var addr = app.httpServer.address();
     console.log('blow server online at http://' + addr.address + ':' + addr.port);
@@ -84,6 +94,14 @@ function preGenerate(file, style) {
     meta.insert('afterend', '<title></title>');
     title = head.find().only().elem('title').toValue();
   }
+
+  // rewrite existing scripttag
+  var scripts = base.find().only().elem('script').toArray();
+  scripts.forEach(function (node) {
+    if (node.hasAttr('src') === false) return;
+
+    node.setAttr('src', '/static?src=' + querystring.escape(node.getAttr('src')));
+  });
 
   // insert framework files
   title.insert('afterend',
