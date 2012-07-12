@@ -1,7 +1,7 @@
 {
   "name": "blow",
   "description": "Simple browser boilerplate for the test framework: mocha",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "Andreas Madsen <amwebdk@gmail.com>",
   "bin": { "blow": "./bin/blow" },
   "main": "./blow.js",
