@@ -104,7 +104,8 @@ function preGenerate(file, style) {
 
 // generate the master testsuite
 function generateIndex(base, files) {
-  var head = base.copy().find().only().elem('head').toValue();
+  var document = base.copy();
+  var head = document.find().only().elem('head').toValue();
 
   // set title
   head.find()
@@ -121,7 +122,8 @@ function generateIndex(base, files) {
 
 // generate individual testcases
 function generateTest(base, file) {
-  var head = base.copy().find().only().elem('head').toValue();
+  var document = base.copy();
+  var head = document.find().only().elem('head').toValue();
 
   // modify title
   head.find()
