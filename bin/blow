@@ -20,11 +20,15 @@ argv.forEach(function (arg) {
 var match = /^-(-)?([a-z]+)=([a-z0-9]+)$/;
 var settings = {
   port: 0,
-  style: 'bdd'
+  address: '0.0.0.0',
+  style: 'bdd',
+  index: path.resolve(path.dirname(module.filename), '../index.html')
 };
 var map = {
   'p': 'port',
-  's': 'style'
+  'a': 'address',
+  's': 'style',
+  'i': 'index'
 };
 args.forEach(function (string) {
   var result = string.match(match);
@@ -35,6 +39,8 @@ args.forEach(function (string) {
 
   if (result[3] === 'port') {
     result[2] = parseInt(result[2], 10);
+  } else if (result[3] === 'index') {
+    result[2] = path.resolve(result[2]);
   }
 
   if (settings.hasOwnProperty(result[2])) {

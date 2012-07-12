@@ -1,7 +1,7 @@
 {
   "name": "blow",
   "description": "Simple browser boilerplate for the test framework: mocha",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "Andreas Madsen <amwebdk@gmail.com>",
   "bin": { "blow": "./bin/blow" },
   "main": "./blow.js",
@@ -18,7 +18,7 @@
   "dependencies": {
     "mocha" :  "1.3.x",
     "chai": "1.1.x",
-    "domstream": "0.3.x",
+    "domstream": "0.4.x",
     "tako": "0.3.x"
   },
   "license": "MIT",

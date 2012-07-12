@@ -43,68 +43,93 @@ module.exports = function(files, settings) {
     app.route('/test' + relative).file(map[relative]);
   });
 
-  //
-  var indexFile = generateIndex(map, settings.style);
+  // Standart output
+  var base = preGenerate(settings.index, settings.style);
+
+  //Generate pages
+  var indexFile = generateIndex(base, map);
   app.route('/').html(indexFile);
 
   // route all subtest pages
   Object.keys(map).forEach(function (relative) {
-    var content = generateTest(relative, settings.style);
+    var content = generateTest(base, relative);
     app.route(relative).html(content);
   });
 
-  app.httpServer.listen(settings.port, function () {
-    console.log('blow server online at http://127.0.0.1:' + app.httpServer.address().port);
+  app.httpServer.listen(settings.port, settings.address, function () {
+    var addr = app.httpServer.address();
+    console.log('blow server online at http://' + addr.address + ':' + addr.port);
   });
 };
 
-// Standart output
-var base = domstream( fs.readFileSync( path.resolve(path.dirname(module.filepath), 'index.html') ) );
+function preGenerate(file, style) {
+  var base = domstream(fs.readFileSync(file)).live(true);
+
+  var head = base.find().only().elem('head').toValue();
+  if (!head) throw new Error('a <head> tag must exist');
+
+  var body = base.find().only().elem('body').toValue();
+  if (!body) throw new Error('a <body> tag must exist');
+
+  // insert meta tag
+  var meta = head.find().only().elem('meta').attr('charset').toValue();
+  if (meta === false) {
+    head.insert('afterbegin', '<meta charset="utf8">');
+    meta = head.find().only().elem('meta').attr('charset').toValue();
+  }
+
+  // insert title tag
+  var title = head.find().only().elem('title').toValue();
+  if (title === false) {
+    meta.insert('afterend', '<title></title>');
+    title = head.find().only().elem('title').toValue();
+  }
+
+  // insert framework files
+  title.insert('afterend',
+    '<link rel="stylesheet" href="/file/mocha.css">' +
+    '<script src="/file/chai.js"></script>' +
+    '<script src="/file/mocha.js"></script>' +
+    '<script>mocha.setup("' + style + '")</script>' +
+    '<script>window.onload = function () { mocha.run() };</script>');
+
+  // insert framework container
+  var container = body.find().only().attr('id', 'mocha').toValue();
+  if (container === false) {
+    body.append('<div id="mocha"></div>');
+  }
+
+  return base.live(false);
+}
 
 // generate the master testsuite
-function generateIndex(files, style) {
-  var document = base.copy();
+function generateIndex(base, files) {
+  var head = base.copy().find().only().elem('head').toValue();
 
-  // modify title
-  var title = document.find().only().elem('title').toValue();
-  title.setContent('Mocha Tests - all');
-
-  // add testcases
-  var head = document.find().only().elem('head').toValue();
-
-  // set mocha style
-  head.append('<script>mocha.setup("' + style + '")</script>');
+  // set title
+  head.find()
+      .only().elem('title').toValue()
+      .setContent('Mocha Tests - all');
 
   // bind testcases
   Object.keys(files).forEach(function (relative) {
     head.append('<script src="/test' + relative + '"></script>');
   });
 
-  // bind mocha runner
-  head.append('<script> window.onload = function () { mocha.run() }; </script>');
-
   return document.content;
 }
 
 // generate individual testcases
-function generateTest(file, style) {
-  var document = base.copy();
+function generateTest(base, file) {
+  var head = base.copy().find().only().elem('head').toValue();
 
   // modify title
-  var title = document.find().only().elem('title').toValue();
-  title.setContent('Mocha Tests - ' + file);
-
-  // add testcases
-  var head = document.find().only().elem('head').toValue();
-
-  // set mocha style
-  head.append('<script>mocha.setup("' + style + '")</script>');
+  head.find()
+      .only().elem('title').toValue()
+      .setContent('Mocha Tests - ' + file);
 
   // bind testcases
   head.append('<script src="/test' + file + '"></script>');
-
-  // bind mocha runner
-  head.append('<script> window.onload = function () { mocha.run() }; </script>');
 
   return document.content;
 }
