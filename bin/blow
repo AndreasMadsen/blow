@@ -17,7 +17,7 @@ argv.forEach(function (arg) {
 });
 
 // var parse settings
-var match = /^-(-)?([a-z]+)=([a-z0-9]+)$/;
+var match = /^-(-)?([a-z]+)=(.+)$/;
 var settings = {
   port: 0,
   address: '0.0.0.0',
