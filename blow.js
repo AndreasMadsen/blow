@@ -23,6 +23,9 @@ module.exports = function(files, settings) {
   var chaiPath = path.resolve( path.dirname(require.resolve('chai')), 'chai.js');
   app.route('/file/chai.js').file(chaiPath);
 
+  var blowPath = path.resolve( path.dirname(module.filename), 'script.js');
+  app.route('/file/blow.js').file(blowPath);
+
   // find the shared dirname
   var root = path.dirname(files[0]), i, l;
   for (i = 1, l = files.length; i < l; i++) {
@@ -108,8 +111,8 @@ function preGenerate(file, style) {
     '<link rel="stylesheet" href="/file/mocha.css">' +
     '<script src="/file/chai.js"></script>' +
     '<script src="/file/mocha.js"></script>' +
-    '<script>mocha.setup("' + style + '")</script>' +
-    '<script>window.onload = function () { mocha.run() };</script>');
+    '<script src="/file/blow.js"></script>' +
+    '<script>mocha.setup("' + style + '")</script>');
 
   // insert framework container
   var container = body.find().only().attr('id', 'mocha').toValue();
