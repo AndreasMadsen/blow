@@ -1,7 +1,7 @@
 {
   "name": "blow",
   "description": "Simple browser wrapper on test framework: mocha",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Andreas Madsen <amwebdk@gmail.com>",
   "bin": { "blow": "./bin/blow" },
   "main": "./blow.js",
