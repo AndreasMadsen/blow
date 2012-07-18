@@ -99,7 +99,7 @@ function preGenerate(file, style) {
   }
 
   // rewrite existing scripttag
-  var scripts = base.find().only().elem('script').toArray();
+  var scripts = base.find().elem('script').toArray();
   scripts.forEach(function (node) {
     if (node.hasAttr('src') === false) return;
 
