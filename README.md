@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/AndreasMadsen/blow.png)](http://travis-ci.org/AndreasMadsen/blow)
 #blow
 
 > Very simple binding between mocha and your browser.
