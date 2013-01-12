@@ -10,37 +10,30 @@ npm install -g blow
 
 ##Use
 
-The blow server is started with `blow`.
+```
+Usage:
 
-You can the input in your testcases with `blow test/*` or whatever you directory
-name may be.
+blow OPTIONS [test files]
 
-There are a few options there too.
+  Start blow test server
 
-#### port
+  OPTIONS:
 
-By default the port is random, however you can set it with:
+    --listen    Default to 0.0.0.0:0, that means it will listen to all network
+                interfaces and pick a random port.
 
-* `--port=number`
-* `-p=number`
+    --style     Default to bdd, see the mocha documentation for more mocha
+                styles.
 
-#### address
+    --index     Default see below, this is the template there will be used
+                for createing test pages. By changeing this you can include
+                scripts and other html elements, that you can use for testing.
+                Note that scripts can be included by specifing a relative path
+                from the index.html file to a .js file.
+                (e.q. <script src="../script.js"></script>)
+```
 
-By default the address is `0.0.0.0` but you can set it with
-
-* `--address=ip/name`
-* `-a=ip/name`
-
-#### style
-
-By default the mocha teststyle is `bdd`, but you can set it with
-
-* `--style=mochaStyleName`
-* `-s=mochaStyleName`
-
-#### index
-
-By default the template file is the following:
+**Default index.html file**
 
 ```html
 <!DOCTYPE html>
@@ -54,28 +47,6 @@ By default the template file is the following:
 </body>
 </html>
 ```
-
-However you may wich to include the some script files, to do that simply
-use the following pattern:
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <script src="../somefile.js"></script>
-</head>
-<body>
-</body>
-</html>
-```
-
-Blow will then transform the template file, to it points the correct file, relative
-to your template file.
-
-To set the template file, simply use:
-
-* `--index=test/index.html`
-* `-i=test/index.html`
 
 ##License
 
