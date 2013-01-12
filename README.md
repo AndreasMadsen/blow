@@ -8,6 +8,17 @@
 npm install -g blow
 ```
 
+##Example
+
+```shell
+$blow --listen=localhost:11000 test/*
+blow server online at http://127.0.0.1:11000
+```
+
+You can then run all tests by opening `http://127.0.0.1:11000` in your browser.
+Asuming that you have seperated your tests intro files, you can run a subset
+of tests by pointing your browser to `http://127.0.0.1:11000/filename.js`
+
 ##Use
 
 ```
