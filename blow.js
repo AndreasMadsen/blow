@@ -5,29 +5,94 @@
 
 var fs = require('fs');
 var url = require('url');
+var http = require('http');
 var path = require('path');
-var tako = require('tako');
+var filed = require('filed');
 var domstream = require('domstream');
 var querystring = require('querystring');
-var filed = require('filed');
 
+// Create a testing server
 module.exports = function(files, settings) {
 
-  var app = tako();
+  var server = http.createServer();
 
+  function sendhtml(content) {
+    return function () {
+      this.res.writeHead(200, {'Content-Type': 'text/html'});
+      this.res.end(content);
+    };
+  }
+
+  // Route framework files
   var mochaCorePath = path.resolve( path.dirname(require.resolve('mocha')), 'mocha.js');
-  app.route('/file/mocha.js').file(mochaCorePath);
-
   var mochaStylePath = path.resolve( path.dirname(require.resolve('mocha')), 'mocha.css');
-  app.route('/file/mocha.css').file(mochaStylePath);
-
   var chaiPath = path.resolve( path.dirname(require.resolve('chai')), 'chai.js');
-  app.route('/file/chai.js').file(chaiPath);
-
   var blowPath = path.resolve( path.dirname(module.filename), 'script.js');
-  app.route('/file/blow.js').file(blowPath);
 
+  // creates a map between a shared relative filepath and the absolute filepath
+  var fileMap = createFileMap(files);
+
+  // Standart output
+  var base = preGenerate(settings.index, settings.style);
+
+  //Generate pages
+  var indexFile = generateIndex(base, fileMap);
+
+  // Resolve the path that static files are relative to
+  var staticRoot = path.dirname(settings.index);
+
+  server.on('request', function (req, res) {
+    var href = url.parse(req.url, true);
+
+    if (href.pathname === '/') {
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.end(indexFile);
+    }
+
+    else if (href.pathname === '/file/mocha.js') {
+      req.pipe(filed(mochaCorePath)).pipe(res);
+    } else if (href.pathname === '/file/mocha.css') {
+      req.pipe(filed(mochaStylePath)).pipe(res);
+    } else if (href.pathname === '/file/chai.js') {
+      req.pipe(filed(chaiPath)).pipe(res);
+    } else if (href.pathname === '/file/blow.js') {
+      req.pipe(filed(blowPath)).pipe(res);
+    }
+
+    else if (href.pathname.indexOf('/test/') === 0) {
+      req.pipe(filed( fileMap[ href.pathname.slice('/test'.length)] )).pipe(res);
+    }
+
+    else if (href.pathname === '/static') {
+      // yes, this so unsafe that it is hard to understand
+      // but wtf, it is just a testsuite
+      req.pipe( filed(path.resolve(staticRoot, href.query.src)) ).pipe(res);
+    }
+
+    else if (fileMap.hasOwnProperty(href.pathname)) {
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.end(generateTest(base, href.pathname));
+    }
+
+    else {
+      res.writeHead(404, {'Content-Type': 'text/html'});
+      res.end();
+    }
+  });
+
+  // route all subtest pages
+  server.listen(settings.port, settings.address, function () {
+    var addr = server.address();
+    console.log('blow server online at http://' + addr.address + ':' + addr.port);
+  });
+};
+
+function createFileMap(files) {
   // find the shared dirname
+  files = files.map(function (relative) {
+    return path.resolve(relative);
+  });
+
   var root = path.dirname(files[0]), i, l;
   for (i = 1, l = files.length; i < l; i++) {
     var testDir = path.dirname(files[i]);
@@ -38,43 +103,14 @@ module.exports = function(files, settings) {
     }
   }
 
-  // create pathmap
+  // create path map, the map will transform shortpath to realpath
   var map = {};
   for (i = 0, l = files.length; i < l; i++) {
     map[ files[i].slice(root.length) ] = files[i];
   }
 
-  // route all static test files
-  Object.keys(map).forEach(function (relative) {
-    app.route('/test' + relative).file(map[relative]);
-  });
-
-  // Standart output
-  var base = preGenerate(settings.index, settings.style);
-
-  //Generate pages
-  var indexFile = generateIndex(base, map);
-  app.route('/').html(indexFile);
-
-  // route all subtest pages
-  Object.keys(map).forEach(function (relative) {
-    var content = generateTest(base, relative);
-    app.route(relative).html(content);
-  });
-
-  // route static requests
-  var staticRoot = path.dirname(settings.index);
-  app.route('/static', function (req, res) {
-    // yes, this so unsafe that it is hard to understand
-    // but wtf, it is just a testsuite
-    req.pipe( filed(path.resolve(staticRoot, req.qs.src)) ).pipe(res);
-  });
-
-  app.httpServer.listen(settings.port, settings.address, function () {
-    var addr = app.httpServer.address();
-    console.log('blow server online at http://' + addr.address + ':' + addr.port);
-  });
-};
+  return map;
+}
 
 function preGenerate(file, style) {
   var base = domstream(fs.readFileSync(file)).live(true);
@@ -105,9 +141,9 @@ function preGenerate(file, style) {
     if (node.hasAttr('src') === false) return;
 
     var href = url.parse(node.getAttr('src'));
-    if (href.protocol === undefined) {
-      node.setAttr('src', '/static?src=' + querystring.escape(node.getAttr('src')));
-    }
+    if (href.protocol) return;
+
+    node.setAttr('src', '/static?src=' + querystring.escape(node.getAttr('src')));
   });
 
   // insert framework files
