@@ -4,6 +4,7 @@
  */
 
 var fs = require('fs');
+var url = require('url');
 var path = require('path');
 var tako = require('tako');
 var domstream = require('domstream');
@@ -103,7 +104,10 @@ function preGenerate(file, style) {
   scripts.forEach(function (node) {
     if (node.hasAttr('src') === false) return;
 
-    node.setAttr('src', '/static?src=' + querystring.escape(node.getAttr('src')));
+    var href = url.parse(node.getAttr('src'));
+    if (href.protocol === undefined) {
+      node.setAttr('src', '/static?src=' + querystring.escape(node.getAttr('src')));
+    }
   });
 
   // insert framework files
