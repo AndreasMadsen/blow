@@ -1,7 +1,7 @@
 {
   "name": "blow",
   "description": "Simple browser wrapper on test framework: mocha",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "author": "Andreas Madsen <amwebdk@gmail.com>",
   "bin": { "blow": "./bin/blow" },
   "main": "./blow.js",
@@ -24,7 +24,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": "0.6 || 0.8",
+    "node": "0.6 || 0.8 || 0.9 || 0.10",
     "npm": "1"
   }
 }
