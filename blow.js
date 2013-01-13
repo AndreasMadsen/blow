@@ -44,6 +44,8 @@ module.exports = function(files, settings) {
   server.on('request', function (req, res) {
     var href = url.parse(req.url, true);
 
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
     if (href.pathname === '/') {
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.end(indexFile);
