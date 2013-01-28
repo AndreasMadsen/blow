@@ -23,4 +23,12 @@ var settings = {
 };
 
 // start server
-core(files, settings);
+var server = http.createServer();
+
+server.on('request', core(files, settings));
+
+// route all subtest pages
+server.listen(settings.port, settings.address, function () {
+  var addr = server.address();
+  console.log('blow server online at http://' + addr.address + ':' + addr.port);
+});

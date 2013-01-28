@@ -14,8 +14,6 @@ var querystring = require('querystring');
 // Create a testing server
 module.exports = function(files, settings) {
 
-  var server = http.createServer();
-
   function sendhtml(content) {
     return function () {
       this.res.writeHead(200, {'Content-Type': 'text/html'});
@@ -41,7 +39,7 @@ module.exports = function(files, settings) {
   // Resolve the path that static files are relative to
   var staticRoot = path.dirname(settings.index);
 
-  server.on('request', function (req, res) {
+  function dispatch(req, res) {
     var href = url.parse(req.url, true);
 
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -80,13 +78,9 @@ module.exports = function(files, settings) {
       res.writeHead(404, {'Content-Type': 'text/html'});
       res.end();
     }
-  });
+  }
 
-  // route all subtest pages
-  server.listen(settings.port, settings.address, function () {
-    var addr = server.address();
-    console.log('blow server online at http://' + addr.address + ':' + addr.port);
-  });
+  return dispatch;
 };
 
 function createFileMap(files) {
